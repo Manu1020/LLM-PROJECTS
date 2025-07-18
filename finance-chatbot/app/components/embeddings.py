@@ -6,8 +6,7 @@ from app.common.custom_exception import CustomException
 from app.config.config import HF_EMBEDDING_MODEL
 
 logger = get_logger(__name__)
-import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 def get_embedding_model():
     try:
         logger.info("Loading embedding model")

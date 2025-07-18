@@ -6,6 +6,10 @@ dist/
 wheels/
 *.egg-info
 
+#index and log files
+vector_db/
+logs/
+
 # Virtual environments
 .venv
 .DS_Store
