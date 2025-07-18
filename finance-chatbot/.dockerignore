@@ -7,5 +7,4 @@ env/
 .DS_Store
 .git/
 logs/
-data/
 vector_db/
