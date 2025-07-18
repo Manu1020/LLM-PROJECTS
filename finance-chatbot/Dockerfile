@@ -30,7 +30,7 @@ RUN echo "Copying source code..." && ls -la
 COPY . .
 
 # Expose the port your Flask app runs on
-EXPOSE 8080
+EXPOSE 5001
 
 # Run the Flask app
 CMD ["uv", "run", "python", "-m", "app.main"]
