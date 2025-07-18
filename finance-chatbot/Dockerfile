@@ -16,19 +16,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (modern Python package manager)
-RUN pip install uv
+RUN echo "Installing uv..." && pip install uv
 
+RUN echo "Copying source code..." && ls -la
 # Copy dependency files first for better caching
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies using uv
-RUN uv sync --frozen --no-dev
+RUN echo "Installing dependencies..." && uv sync --frozen --no-dev
 
+RUN echo "Copying source code..." && ls -la
 # Copy the rest of your application code
 COPY . .
 
 # Expose the port your Flask app runs on
-EXPOSE 5001
+EXPOSE 8080
 
 # Run the Flask app
 CMD ["uv", "run", "python", "-m", "app.main"]
