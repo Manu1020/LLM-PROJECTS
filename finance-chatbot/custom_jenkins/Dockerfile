@@ -26,6 +26,14 @@ USER jenkins
 # unzip awscliv2.zip
 # ./aws/install
 # aws --version
+
+# docker exec -u root -it jenkins-dind bash
+# chown root:docker /var/run/docker.sock
+# chmod 660 /var/run/docker.sock
+# getent group docker
+# # If group 'docker' exists, skip next line
+# usermod -aG docker jenkins
 # exit
+# docker restart jenkins-dind
 
 
