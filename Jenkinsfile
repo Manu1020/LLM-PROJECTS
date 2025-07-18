@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'ap-southeast-2'
+        AWS_REGION = 'ap-southeast-1'
         ECR_REPO = 'my-repo'
         IMAGE_TAG = 'latest'
         SERVICE_NAME = 'finance-chatbot-service'
