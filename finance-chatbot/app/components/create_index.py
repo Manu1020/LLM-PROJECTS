@@ -35,5 +35,5 @@ def create_index(file_name=None, force_reindex=False):
         raise error_message
 
 if __name__ == "__main__":
-    file_name = "NASDAQ_AMZN_2024"
+    file_name = "NASDAQ_MSFT_2024"
     create_index(file_name)

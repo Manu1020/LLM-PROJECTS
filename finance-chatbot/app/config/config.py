@@ -17,6 +17,7 @@ HF_LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 HF_TOKEN = os.environ.get("HF_TOKEN")
 HUGGINFACE_REPO_ID = os.environ.get("HUGGINFACE_REPO_ID")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 
 
 # assign data paths
@@ -25,8 +26,8 @@ DATA_PATH = "data/"
 
 
 # set configuration parameters
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 NUM_OF_DOCS_TO_RETRIEVE = 5
 LLM_MODEL = "openai" #"hf", "openai"
 

@@ -31,7 +31,7 @@ COPY . .
 EXPOSE 5001
 
 # Run the Flask app
-CMD ["uv", "run", "python", "-m", "app.main"]
+CMD ["uv", "run", "python", "-m", "app.main_agent"]
 
 # # Run with Gunicorn for production
 # CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "120", "--preload", "app.main:app"]
