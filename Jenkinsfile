@@ -5,7 +5,8 @@ pipeline {
         AWS_REGION = 'us-east-1'
         ECR_REPO = 'my-repo'
         IMAGE_TAG = 'latest'
-        SERVICE_NAME = 'finance-chatbot-service'
+        CLUSTER_NAME = 'finance-chatbot-cluster'
+        SERVICE_NAME = 'finance-chatbot-def-service-o6aaiihg'
     }
 
     stages {
@@ -38,6 +39,21 @@ pipeline {
                     }
                 }
             }
+        }
+        stage('Deploy to ECS Fargate') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-token']]) {
+                    script {
+                        sh """
+                        aws ecs update-service \
+                        --cluster ${CLUSTER_NAME} \
+                        --service ${SERVICE_NAME}  \
+                        --force-new-deployment \
+                        --region ${AWS_REGION}
+                        """
+                        }
+                    }
+                }
         }
 
         //  stage('Deploy to AWS App Runner') {
