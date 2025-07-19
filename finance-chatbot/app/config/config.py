@@ -8,7 +8,8 @@ logger.info("Loading Configuration")
 load_dotenv()
 
 # assign model names
-HF_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+# HF_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+HF_EMBEDDING_MODEL = "FinLang/finance-embeddings-investopedia" # financial specific embeddings
 OPENAI_LLM_MODEL = "gpt-4o-mini"
 HF_LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 
@@ -24,8 +25,8 @@ DATA_PATH = "data/"
 
 
 # set configuration parameters
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 200
 NUM_OF_DOCS_TO_RETRIEVE = 5
 LLM_MODEL = "openai" #"hf", "openai"
 

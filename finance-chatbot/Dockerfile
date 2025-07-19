@@ -16,16 +16,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (modern Python package manager)
-RUN echo "Installing uv..." && pip install uv
+RUN pip install uv
 
-RUN echo "Copying source code..." && ls -la
 # Copy dependency files first for better caching
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies using uv
-RUN echo "Installing dependencies..." && uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev
 
-RUN echo "Copying source code..." && ls -la
 # Copy the rest of your application code
 COPY . .
 
@@ -34,3 +32,6 @@ EXPOSE 5001
 
 # Run the Flask app
 CMD ["uv", "run", "python", "-m", "app.main"]
+
+# # Run with Gunicorn for production
+# CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "120", "--preload", "app.main:app"]

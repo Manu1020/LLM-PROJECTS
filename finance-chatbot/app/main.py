@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from app.components.embeddings import get_embedding_model
 from app.components.retriever import build_qa_chain
 from app.components.create_index import create_index
@@ -31,20 +31,32 @@ def index():
 def index_documents():
     company = request.form.get("company")
     if company:
+        # Clear old indexing status and messages when selecting a new company
+        old_company = session.get("selected_company")
+        if old_company and old_company != company:
+            # Clear old status and messages when switching companies
+            session.pop("indexing_status", None)
+            session.pop("messages", None)
+            session.pop("sources", None)
+        
         try:
             # Index the selected company's documents
             create_index_for_company(company)
             session["selected_company"] = company
-            session["messages"] = []  # Clear previous chat
+            
+            # Only clear messages if this is a new company or first time
+            if old_company != company:
+                session["messages"] = []
+            
             session["indexing_status"] = {
                 "success": True,
-                "message": f"✅ Successfully indexed {company} documents!"
+                "message": f"Successfully indexed {company} documents!"
             }
             session.pop("error", None)  # Clear any previous errors
         except Exception as e:
             session["indexing_status"] = {
                 "success": False,
-                "message": f"❌ Error indexing {company}: {str(e)}"
+                "message": f"Error indexing {company}: {str(e)}"
             }
             logger.error(f"Error indexing {company}: {str(e)}")
     return redirect(url_for("index"))
@@ -52,33 +64,49 @@ def index_documents():
 @app.route("/chat", methods=["POST"])
 def chat():
     if "selected_company" not in session:
-        session["error"] = "Please select a company first!"
-        return redirect(url_for("index"))
+        return jsonify({"success": False, "error": "Please select a company first!"})
     
     user_input = request.form.get("prompt")
-    if user_input:
-        if "messages" not in session:
-            session["messages"] = []
-        
-        
-        messages = session["messages"]
-        messages.append({"role": "user", "content": user_input})
-        session["messages"] = messages
-
-        try:
-            qa_chain = build_qa_chain(file_name=session["selected_company"])
-            response = qa_chain.invoke({"query": user_input})
-            logger.info(f"Response: {response}")
-            result = response.get("result", "No response")
-            messages.append({"role": "assistant", "content": result})
-            session["messages"] = messages
-            session.pop("error", None)  # Clear any previous errors
-        except Exception as e:
-            error_message = f"Error: {str(e)}"
-            session["error"] = error_message
-            logger.error(f"Error in chat: {str(e)}")
+    if not user_input:
+        return jsonify({"success": False, "error": "No input provided"})
     
-    return redirect(url_for("index"))
+    try:
+        qa_chain = build_qa_chain(file_name=session["selected_company"])
+        response = qa_chain.invoke({"query": user_input})
+        logger.info(f"Response: {response}")
+        
+        result = response.get("result", "No response")
+        source_documents = response.get("source_documents", [])
+        
+        # Format sources for JSON response
+        sources = []
+        for i, doc in enumerate(source_documents, 1):
+            source_info = {
+                "number": i,
+                "content": doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content,
+                "metadata": {
+                    "page": doc.metadata.get("page")  # Only keep page number
+                }
+            }
+            sources.append(source_info)
+        
+        return jsonify({
+            "success": True,
+            "response": result,
+            "sources": sources
+        })
+        
+    except Exception as e:
+        error_message = f"Error: {str(e)}"
+        logger.error(f"Error in chat: {str(e)}")
+        return jsonify({"success": False, "error": error_message})
+
+# Add a new route to fetch sources for a specific message
+@app.route("/get_sources/<message_index>")
+def get_sources(message_index):
+    sources = session.get("sources", {}).get(message_index, [])
+    return {"sources": sources}
+
 
 @app.route("/clear")
 def clear():
@@ -99,4 +127,4 @@ def create_index_for_company(company):
         raise e
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=5001, debug=False, use_reloader=False)

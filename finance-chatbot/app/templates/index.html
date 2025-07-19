@@ -2,38 +2,646 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>🔍 Finance Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>�� AI Finance Analyst</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; background-color: #1a1a1a; color: white; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .section { margin-bottom: 2rem; padding: 1.5rem; background-color: #2d2d2d; border-radius: 10px; }
-        .company-selector { margin-bottom: 1rem; }
-        select { width: 100%; padding: 0.75rem; font-size: 1rem; background-color: #404040; color: white; border: 1px solid #555; border-radius: 5px; }
-        .index-btn { padding: 0.75rem 1.5rem; background-color: #007acc; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-        .index-btn:hover { background-color: #005a9e; }
-        .chat-container { margin-top: 2rem; }
-        .message { margin-bottom: 1rem; padding: 1rem; border-radius: 10px; }
-        .user { background-color: #2d5a8b; text-align: right; }
-        .assistant { background-color: #404040; text-align: left; }
-        textarea { width: 100%; height: 3rem; padding: 0.75rem; font-size: 1rem; background-color: #404040; color: white; border: 1px solid #555; border-radius: 5px; }
-        .send-btn { padding: 0.75rem 1.5rem; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; margin-top: 0.5rem; }
-        .send-btn:hover { background-color: #1e7e34; }
-        .clear-btn { padding: 0.5rem 1rem; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 1rem; }
-        .error { color: #ff6b6b; }
-        .success { color: #51cf66; }
-        .status { margin-top: 1rem; padding: 0.5rem; border-radius: 5px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .company-selector {
+            margin-bottom: 2rem;
+        }
+
+        .company-selector label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #2d3748;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 101, 101, 0.3);
+        }
+
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #22543d;
+            border: 1px solid #68d391;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .company-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            font-size: 1rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-role {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #2d3748;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+            max-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .sources {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .sources h4 {
+            margin: 0 0 0.75rem 0;
+            color: #667eea;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .source-item {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .source-number {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .source-content {
+            font-size: 0.85rem;
+            color: #4a5568;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .source-metadata {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+
+        .toggle-sources {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .toggle-sources:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sources-hidden {
+            display: none;
+        }
+
+        .loading {
+            color: #718096;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: #fed7d7;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #fc8181;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: #718096;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #718096;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+        
+        .copy-btn {
+            background: none;
+            border: 1px solid #e2e8f0;
+            color: #718096;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #f7fafc;
+            color: #4a5568;
+            border-color: #cbd5e0;
+        }
+        
+        .copy-btn.copied {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+        
+        /* Better formatting for calculations */
+        .calculation {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .formula {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            font-weight: 500;
+        }
+        
+        .result {
+            background: #c6f6d5;
+            border: 1px solid #68d391;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            font-weight: 600;
+            color: #22543d;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid #e2e8f0;
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-content h3 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .loading-content p {
+            color: #718096;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            animation: progress 2s ease-in-out infinite;
+            border-radius: 6px;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+
+        .loading-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: left;
+        }
+
+        .step {
+            padding: 0.75rem 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            color: #718096;
+            font-size: 0.9rem;
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border-left-color: #4299e1;
+            font-weight: 500;
+        }
+
+        .step.completed {
+            background: #f0fff4;
+            color: #22543d;
+            border-left-color: #48bb78;
+        }
+
+        .loading-tip {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #2b6cb0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-tip i {
+            color: #4299e1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+            }
+            
+            .message-bubble {
+                max-width: 90%;
+            }
+            .loading-content {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .loading-content h3 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Processing Financial Documents...</h3>
+            <p id="loading-message">Please wait while we analyze your company's financial data</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="loading-tip">
+                <i class="fas fa-lightbulb"></i>
+                <span>This process may take 2-3 minutes depending on document size</span>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <h1>�� AI Finance Chatbot</h1>
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> AI Finance Analyst</h1>
+            <p>Your intelligent financial research assistant powered by AI</p>
+        </div>
 
         <!-- Step 1: Select and Index Company Documents -->
-        <div class="section">
-            <h2>📊 Step 1: Select Company Documents</h2>
-            <form method="post" action="{{ url_for('index_documents') }}">
+        <div class="card">
+            <h2><i class="fas fa-building"></i> Step 1: Select Company Documents</h2>
+            <form method="post" action="{{ url_for('index_documents') }}" id="company-form">
                 <div class="company-selector">
-                    <label for="company">Choose a company:</label>
+                    <label for="company">Choose a company to analyze:</label>
                     <select name="company" id="company" required>
                         <option value="">Select a company...</option>
                         <option value="NASDAQ_AAPL_2024">Apple Inc. (AAPL)</option>
@@ -43,11 +651,14 @@
                         <option value="NASDAQ_NVDA_2024">NVIDIA Corporation (NVDA)</option>
                     </select>
                 </div>
-                <button type="submit" class="index-btn">📚 Index Company Documents</button>
+                <button type="submit" class="btn btn-primary" id="index-btn">
+                    <i class="fas fa-database"></i> Index Company Documents
+                </button>
             </form>
             
             {% if indexing_status %}
                 <div class="status {% if indexing_status.success %}success{% else %}error{% endif %}">
+                    <i class="fas {% if indexing_status.success %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
                     {{ indexing_status.message }}
                 </div>
             {% endif %}
@@ -55,33 +666,306 @@
 
         <!-- Step 2: Chat Interface -->
         {% if session.get('selected_company') %}
-        <div class="section chat-container">
-            <h2>💬 Step 2: Ask Questions about {{ session.get('selected_company')|title }}</h2>
+        <div class="card chat-container">
+            <div class="chat-header">
+                <h2><i class="fas fa-comments"></i> Financial Analysis Chat</h2>
+                <div class="company-badge">
+                    <i class="fas fa-building"></i> {{ session.get('selected_company')|title }}
+                </div>
+            </div>
             
             {% if error %}
-                <p class="error">{{ error }}</p>
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                </div>
             {% endif %}
 
-            <div id="chat-box">
+            <div class="chat-box" id="chat-box">
                 {% for msg in messages %}
                     <div class="message {{ msg.role }}">
-                        <strong>{{ msg.role|capitalize }}:</strong><br />
-                        {{ msg.content | safe | nl2br }}
+                        <div class="message-role">{{ msg.role|capitalize }}</div>
+                        <div class="message-bubble">
+                            <div class="message-content">{{ msg.content | safe | nl2br }}</div>
+                            <div class="message-actions">
+                                <button class="copy-btn" onclick="copyMessage({{ loop.index0 }})" id="copy-btn-{{ loop.index0 }}">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            
+                            {% if msg.role == 'assistant' %}
+                                <button class="toggle-sources" onclick="toggleSources({{ loop.index0 }})" id="btn-{{ loop.index0 }}">
+                                    <i class="fas fa-book"></i> Show Sources
+                                </button>
+                                <div class="sources sources-hidden" id="sources-{{ loop.index0 }}">
+                                    <div class="loading">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading sources...
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
+                
+                <div class="typing-indicator" id="typing-indicator">
+                    <i class="fas fa-robot"></i> AI is analyzing...
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
             </div>
 
-            <form method="post" action="{{ url_for('chat') }}">
-                <textarea name="prompt" placeholder="Ask a question about {{ session.get('selected_company')|title }}'s financial data..." required></textarea>
-                <br />
-                <button type="submit" class="send-btn">Send Question</button>
+            <form method="post" action="{{ url_for('chat') }}" id="chat-form">
+                <div class="chat-input">
+                    <div class="input-group">
+                        <textarea 
+                            name="prompt" 
+                            placeholder="Ask about {{ session.get('selected_company')|title }}'s financial performance, revenue, growth, risks, or any other financial metrics..." 
+                            required
+                            onkeydown="if(event.keyCode==13 && !event.shiftKey){event.preventDefault(); this.form.submit();}"
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
             </form>
 
-            <form method="get" action="{{ url_for('clear') }}">
-                <button type="submit" class="clear-btn">Clear Chat</button>
-            </form>
+            <div class="chat-actions">
+                <form method="get" action="{{ url_for('clear') }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Clear Chat
+                    </button>
+                </form>
+            </div>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        let userScrolled = false;
+        let lastScrollTop = 0;
+
+        // Check if user has manually scrolled up
+        function handleScroll() {
+            const chatBox = document.getElementById('chat-box');
+            if (!chatBox) return;
+            
+            const scrollTop = chatBox.scrollTop;
+            const scrollHeight = chatBox.scrollHeight;
+            const clientHeight = chatBox.clientHeight;
+            
+            // Check if user scrolled up (not at bottom)
+            if (scrollTop + clientHeight < scrollHeight - 10) {
+                userScrolled = true;
+            } else {
+                userScrolled = false;
+            }
+            
+            lastScrollTop = scrollTop;
+        }
+
+        // Smart auto-scroll - only if user is at bottom
+        function smartScrollToBottom() {
+            const chatBox = document.getElementById('chat-box');
+            if (!chatBox) return;
+            
+            // Only auto-scroll if user hasn't manually scrolled up
+            if (!userScrolled) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // Force scroll to bottom (for new messages)
+        function forceScrollToBottom() {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+                userScrolled = false; // Reset the flag
+            }
+        }
+
+        // Add scroll event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                chatBox.addEventListener('scroll', handleScroll);
+            }
+        });
+
+        // AJAX chat submission - NO PAGE RELOAD
+        document.getElementById('chat-form')?.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent form submission
+            
+            const form = e.target;
+            const textarea = form.querySelector('textarea[name="prompt"]');
+            const userInput = textarea.value.trim();
+            
+            if (!userInput) return;
+            
+            // Clear the input
+            textarea.value = '';
+            
+            // Add user message immediately
+            addMessage('user', userInput);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Send AJAX request
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `prompt=${encodeURIComponent(userInput)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTypingIndicator();
+                
+                if (data.success) {
+                    addMessage('assistant', data.response, data.sources);
+                } else {
+                    addMessage('assistant', `Error: ${data.error}`, []);
+                }
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                addMessage('assistant', `Error: ${error.message}`, []);
+            });
+        });
+
+        function addMessage(role, content, sources = []) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const messageIndex = document.querySelectorAll('.message').length;
+            
+            let sourcesHtml = '';
+            if (role === 'assistant' && sources && sources.length > 0) {
+                sourcesHtml = `
+                    <button class="toggle-sources" onclick="toggleSources(${messageIndex})" id="btn-${messageIndex}">
+                        <i class="fas fa-book"></i> Show Sources (${sources.length})
+                    </button>
+                    <div class="sources sources-hidden" id="sources-${messageIndex}">
+                        <h4><i class="fas fa-book-open"></i> Sources Used:</h4>
+                        ${sources.map((source, idx) => `
+                            <div class="source-item">
+                                <span class="source-number">Source ${idx + 1}:</span>
+                                <div class="source-content">${source.content}</div>
+                                <div class="source-metadata">
+                                    <i class="fas fa-file"></i> Page ${source.metadata.page}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-role">${role.charAt(0).toUpperCase() + role.slice(1)}</div>
+                <div class="message-bubble">
+                    <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+                    <div class="message-actions">
+                        <button class="copy-btn" onclick="copyMessage(${messageIndex})" id="copy-btn-${messageIndex}">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    ${sourcesHtml}
+                </div>
+            `;
+            
+            chatBox.appendChild(messageDiv);
+            
+            // Smooth scroll to new message
+            setTimeout(() => {
+                smartScrollToBottom();
+            }, 100);
+        }
+
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'flex';
+                smartScrollToBottom();
+            }
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'none';
+            }
+        }
+
+        function toggleSources(messageIndex) {
+            const sourcesDiv = document.getElementById(`sources-${messageIndex}`);
+            const button = document.getElementById(`btn-${messageIndex}`);
+            
+            if (sourcesDiv.classList.contains('sources-hidden')) {
+                sourcesDiv.classList.remove('sources-hidden');
+                button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Sources';
+            } else {
+                sourcesDiv.classList.add('sources-hidden');
+                button.innerHTML = '<i class="fas fa-book"></i> Show Sources';
+            }
+        }
+
+        function copyMessage(messageIndex) {
+            const messages = document.querySelectorAll('.message');
+            const message = messages[messageIndex];
+            const content = message.querySelector('.message-content').textContent;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                const copyBtn = document.getElementById(`copy-btn-${messageIndex}`);
+                const originalText = copyBtn.innerHTML;
+                
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy message');
+            });
+        }
+
+        // Initial scroll to bottom only on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                forceScrollToBottom();
+            }, 100);
+        });
+
+        // Show loading overlay when form is submitted
+        document.getElementById('company-form')?.addEventListener('submit', function() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingMessage = document.getElementById('loading-message');
+            const company = document.getElementById('company').value;
+            
+            if (company) {
+                // Update message with company name
+                const companyNames = {
+                    'NASDAQ_AAPL_2024': 'Apple Inc.',
+                    'NASDAQ_MSFT_2024': 'Microsoft Corporation',
+                    'NASDAQ_AMZN_2024': 'Amazon.com Inc.',
+                    'NASDAQ_META_2024': 'Meta Platforms Inc.',
+                    'NASDAQ_NVDA_2024': 'NVIDIA Corporation'
+                };
+                
+                const companyName = companyNames[company] || company;
+                loadingMessage.textContent = `Please wait while we analyze ${companyName}'s financial documents.`;
+                
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+    </script>
 </body>
 </html>
