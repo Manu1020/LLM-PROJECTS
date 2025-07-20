@@ -1,4 +1,5 @@
 from langchain.chains import RetrievalQA
+from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import PromptTemplate
 
 from app.components.llm_setup import initialize_llm
@@ -11,27 +12,49 @@ from app.config.config import NUM_OF_DOCS_TO_RETRIEVE
 
 logger = get_logger(__name__)
 
-SYSTEM_PROMPT_TEMPLATE = """
-You are a helpful and precise assistant that answers questions about financial reports using only the information provided below.
+PROMPT_TEMPLATE = """
+You are a precise and grounded assistant that answers financial report questions using only the context provided.
 
-Instructions:
-- If the question does not require a calculation, simply extract and return the relevant value(s) from the context.
-- If the question requires a calculation (e.g., a financial ratio), first extract all relevant values from the context.
-- If all required values are present, show the calculation steps and provide the final answer.
-- Show calculation steps in plain English and simple arithmetic expressions, not in LaTeX or mathematical notation.
-- When extracting values, preserve the exact units as they appear in the context (e.g., "$1,234 million" not just "1,234").
-- If any required value is missing from the context, clearly state which value(s) are missing and do not attempt to make up any numbers.
-- Do NOT ask the user to provide missing data or suggest that they supply values. Only report what is missing.
-- Always remain grounded in the context — do not make assumptions beyond the provided data.
+## Instructions
 
-Context:
+1. **Choose the Right Query**
+   - You are given both the original and a rewritten version of the user’s question.
+   - **Use the original question if it is clear and directly answerable from the context.**
+   - Use the rewritten version **only if** the original is ambiguous or incomplete.
+   - Do not perform calculations if a direct value can be extracted from the context.
+   - Do not mention or explain which version of the question you are using, and do not include any commentary about your reasoning or process.
+
+
+2. **Extract Information**
+   - Identify and extract only the values explicitly mentioned in the query.
+   - Preserve original formatting and units (e.g., "$3.2M", "18%").
+
+3. **If Calculation is Required**
+   - Only perform a calculation if ALL required values are present AND the value is not already provided directly.
+   - Keep the explanation minimal—just describe the logic in plain English (no formulas).
+   - Do simple arithmetic and provide the final result with appropriate units.
+
+4. **If Any Value is Missing**
+   - Clearly state which value(s) are missing.
+   - Do not guess, fabricate, or request user input.
+
+5. **Stay Grounded**
+   - Rely strictly on the given context.
+   - Do not use external knowledge, assumptions, or commentary.
+
+---
+
+### Context:
 {context}
 
-Question: 
 {question}
 
-Answer:
+---
+
+## Final Answer:
 """
+
+
 llm = initialize_llm()
 
 # LRU cache for vector DBs
@@ -45,7 +68,7 @@ def get_vector_db_for_company(file_name=None):
 
 def get_prompt():
     return PromptTemplate(
-        template=SYSTEM_PROMPT_TEMPLATE,
+        template=PROMPT_TEMPLATE,
         input_variables=["context", "question"]
     )
 
@@ -54,14 +77,17 @@ def build_qa_chain(file_name=None):
         vector_db = get_vector_db_for_company(file_name=file_name)
         if vector_db is None:
             raise CustomException("Vector database not found")
+        
+        retriever = vector_db.as_retriever(search_kwargs={"k": NUM_OF_DOCS_TO_RETRIEVE})
+
+
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm, 
             chain_type="stuff", 
-            retriever=vector_db.as_retriever(
-                search_kwargs={"k": NUM_OF_DOCS_TO_RETRIEVE}
-            ),
+            retriever=retriever,
             return_source_documents=True,
-            chain_type_kwargs={"prompt": get_prompt()}
+            chain_type_kwargs={
+                "prompt": get_prompt()}
         )
         logger.info("QA Retriever initialized successfully")
         return qa_chain

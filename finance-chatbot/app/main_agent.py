@@ -70,10 +70,23 @@ def chat():
     if not user_input:
         return jsonify({"success": False, "error": "No input provided"})
 
+    if "messages" not in session:
+        session["messages"] = []
+
     try:
-        result = agentic_rag_pipeline(user_input, file_name=session["selected_company"])
+        result = agentic_rag_pipeline(
+            user_input, 
+            file_name=session["selected_company"],
+            history=session["messages"]
+        )
         response = result.get("response", "No response")
         source_documents = result.get("sources", [])
+
+        # Append user and bot messages to session
+        messages = session["messages"]
+        messages.append({"role": "user", "content": user_input})
+        messages.append({"role": "bot", "content": response})
+        session["messages"] = messages
 
         # Format sources for JSON response
         sources = []
