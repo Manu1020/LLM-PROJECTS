@@ -19,6 +19,7 @@ Instructions:
 - If the question requires a calculation (e.g., a financial ratio), first extract all relevant values from the context.
 - If all required values are present, show the calculation steps and provide the final answer.
 - Show calculation steps in plain English and simple arithmetic expressions, not in LaTeX or mathematical notation.
+- When extracting values, preserve the exact units as they appear in the context (e.g., "$1,234 million" not just "1,234").
 - If any required value is missing from the context, clearly state which value(s) are missing and do not attempt to make up any numbers.
 - Do NOT ask the user to provide missing data or suggest that they supply values. Only report what is missing.
 - Always remain grounded in the context — do not make assumptions beyond the provided data.

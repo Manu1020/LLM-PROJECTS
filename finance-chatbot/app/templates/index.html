@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>�� AI Finance Analyst</title>
+    <title>AI Finance Chatbot</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -167,7 +167,7 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: 600px;
+            height: 1000px;
         }
 
         .chat-header {
@@ -637,7 +637,7 @@
         </div>
 
         <!-- Step 1: Select and Index Company Documents -->
-        <div class="card">
+        <div class="card" id="indexing-card">
             <h2><i class="fas fa-building"></i> Step 1: Select Company Documents</h2>
             <form method="post" action="{{ url_for('index_documents') }}" id="company-form">
                 <div class="company-selector">
@@ -662,11 +662,12 @@
                     {{ indexing_status.message }}
                 </div>
             {% endif %}
+            
         </div>
 
         <!-- Step 2: Chat Interface -->
         {% if session.get('selected_company') %}
-        <div class="card chat-container">
+        <div class="card chat-container" id="chat-container">
             <div class="chat-header">
                 <h2><i class="fas fa-comments"></i> Financial Analysis Chat</h2>
                 <div class="company-badge">
@@ -687,8 +688,8 @@
                         <div class="message-bubble">
                             <div class="message-content">{{ msg.content | safe | nl2br }}</div>
                             <div class="message-actions">
-                                <button class="copy-btn" onclick="copyMessage({{ loop.index0 }})" id="copy-btn-{{ loop.index0 }}">
-                                    <i class="fas fa-copy"></i> Copy
+                                <button class="copy-btn" onclick="copyMessage(this)" id="copy-btn-{{ loop.index0 }}">
+                                    <i class="fas fa-copy"></i>
                                 </button>
                             </div>
                             
@@ -742,7 +743,6 @@
         </div>
         {% endif %}
     </div>
-
     <script>
         let userScrolled = false;
         let lastScrollTop = 0;
@@ -756,7 +756,6 @@
             const scrollHeight = chatBox.scrollHeight;
             const clientHeight = chatBox.clientHeight;
             
-            // Check if user scrolled up (not at bottom)
             if (scrollTop + clientHeight < scrollHeight - 10) {
                 userScrolled = true;
             } else {
@@ -766,23 +765,22 @@
             lastScrollTop = scrollTop;
         }
 
-        // Smart auto-scroll - only if user is at bottom
+        // Smart auto-scroll
         function smartScrollToBottom() {
             const chatBox = document.getElementById('chat-box');
             if (!chatBox) return;
             
-            // Only auto-scroll if user hasn't manually scrolled up
             if (!userScrolled) {
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
 
-        // Force scroll to bottom (for new messages)
+        // Force scroll to bottom
         function forceScrollToBottom() {
             const chatBox = document.getElementById('chat-box');
             if (chatBox) {
                 chatBox.scrollTop = chatBox.scrollHeight;
-                userScrolled = false; // Reset the flag
+                userScrolled = false;
             }
         }
 
@@ -794,9 +792,9 @@
             }
         });
 
-        // AJAX chat submission - NO PAGE RELOAD
+        // AJAX chat submission
         document.getElementById('chat-form')?.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent form submission
+            e.preventDefault();
             
             const form = e.target;
             const textarea = form.querySelector('textarea[name="prompt"]');
@@ -804,16 +802,10 @@
             
             if (!userInput) return;
             
-            // Clear the input
             textarea.value = '';
-            
-            // Add user message immediately
             addMessage('user', userInput);
-            
-            // Show typing indicator
             showTypingIndicator();
             
-            // Send AJAX request
             fetch('/chat', {
                 method: 'POST',
                 headers: {
@@ -844,6 +836,12 @@
             
             const messageIndex = document.querySelectorAll('.message').length;
             
+            // Simple content formatting
+            let formattedContent = content;
+            if (typeof content === 'string') {
+                formattedContent = content.replace(/\n/g, '<br>');
+            }
+            
             let sourcesHtml = '';
             if (role === 'assistant' && sources && sources.length > 0) {
                 sourcesHtml = `
@@ -868,9 +866,9 @@
             messageDiv.innerHTML = `
                 <div class="message-role">${role.charAt(0).toUpperCase() + role.slice(1)}</div>
                 <div class="message-bubble">
-                    <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+                    <div class="message-content">${formattedContent}</div>
                     <div class="message-actions">
-                        <button class="copy-btn" onclick="copyMessage(${messageIndex})" id="copy-btn-${messageIndex}">
+                        <button class="copy-btn" onclick="copyMessage(this)" id="copy-btn-${messageIndex}">
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
@@ -878,26 +876,48 @@
                 </div>
             `;
             
+            // Remove existing typing indicator
+            const existingTypingIndicator = chatBox.querySelector('.typing-indicator');
+            if (existingTypingIndicator) {
+                existingTypingIndicator.remove();
+            }
+            
             chatBox.appendChild(messageDiv);
             
-            // Smooth scroll to new message
             setTimeout(() => {
                 smartScrollToBottom();
             }, 100);
         }
 
         function showTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                typingIndicator.style.display = 'flex';
-                smartScrollToBottom();
+            const chatBox = document.getElementById('chat-box');
+            
+            const existingTypingIndicator = chatBox.querySelector('.typing-indicator');
+            if (existingTypingIndicator) {
+                existingTypingIndicator.remove();
             }
+            
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.style.display = 'flex';
+            typingIndicator.innerHTML = `
+                <i class="fas fa-robot"></i> AI is analyzing...
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            chatBox.appendChild(typingIndicator);
+            smartScrollToBottom();
         }
 
         function hideTypingIndicator() {
             const typingIndicator = document.getElementById('typing-indicator');
             if (typingIndicator) {
-                typingIndicator.style.display = 'none';
+                typingIndicator.remove();
             }
         }
 
@@ -914,21 +934,18 @@
             }
         }
 
-        function copyMessage(messageIndex) {
-            const messages = document.querySelectorAll('.message');
-            const message = messages[messageIndex];
-            const content = message.querySelector('.message-content').textContent;
+        function copyMessage(button) {
+            const messageDiv = button.closest('.message');
+            const content = messageDiv.querySelector('.message-content').textContent;
             
             navigator.clipboard.writeText(content).then(() => {
-                const copyBtn = document.getElementById(`copy-btn-${messageIndex}`);
-                const originalText = copyBtn.innerHTML;
-                
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                copyBtn.classList.add('copied');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('copied');
                 
                 setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
-                    copyBtn.classList.remove('copied');
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy: ', err);
@@ -936,7 +953,7 @@
             });
         }
 
-        // Initial scroll to bottom only on page load
+        // Initial scroll to bottom
         window.addEventListener('load', function() {
             setTimeout(() => {
                 forceScrollToBottom();
@@ -950,7 +967,6 @@
             const company = document.getElementById('company').value;
             
             if (company) {
-                // Update message with company name
                 const companyNames = {
                     'NASDAQ_AAPL_2024': 'Apple Inc.',
                     'NASDAQ_MSFT_2024': 'Microsoft Corporation',
@@ -961,8 +977,6 @@
                 
                 const companyName = companyNames[company] || company;
                 loadingMessage.textContent = `Please wait while we analyze ${companyName}'s financial documents.`;
-                
-                // Show loading overlay
                 loadingOverlay.style.display = 'flex';
             }
         });

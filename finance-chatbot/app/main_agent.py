@@ -80,7 +80,7 @@ def chat():
         for i, doc in enumerate(source_documents, 1):
             source_info = {
                 "number": i,
-                "content": doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content,
+                "content": doc.page_content[:1000] + "..." if len(doc.page_content) > 1000 else doc.page_content,
                 "metadata": {
                     "page": doc.metadata.get("page")
                 }
