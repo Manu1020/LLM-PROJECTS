@@ -26,8 +26,8 @@ DATA_PATH = "data/"
 
 
 # set configuration parameters
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 200
 NUM_OF_DOCS_TO_RETRIEVE = 5
 LLM_MODEL = "openai" #"hf", "openai"
 

@@ -80,11 +80,14 @@ def chat():
             history=session["messages"]
         )
         response = result.get("response", "No response")
+        tool_response = result.get("tool_response")
         source_documents = result.get("sources", [])
 
         # Append user and bot messages to session
         messages = session["messages"]
         messages.append({"role": "user", "content": user_input})
+        if tool_response:
+            messages.append({"role": "Search_Tool", "content": tool_response})
         messages.append({"role": "bot", "content": response})
         session["messages"] = messages
 

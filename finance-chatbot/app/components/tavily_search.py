@@ -11,9 +11,10 @@ def tavily_lookup(query):
             api_key=TAVILY_API_KEY,
             max_results=1,
             topics=["finance"],
-            include_domains=["investopedia.com", "wikipedia.org"]
+            include_domains=["investopedia.com"]
         )
         response = tool.run(query)
+        logger.info(f"Tavily results: {response["results"][0]["content"]}")
         return response["results"][0]["content"]
     except Exception as e:
         error_message = CustomException("Error calling Tavily API", e)

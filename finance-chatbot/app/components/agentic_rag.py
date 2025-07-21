@@ -21,9 +21,10 @@ def is_definition_query(user_query):
     logger.info(f"Is definition query: {response.is_definition_query}")
     return response.is_definition_query
 
-def rewrite_query(query, history):
+def rewrite_query(query, history, definition):
     try:
         prompt = (
+            f"Definition based on web search: {definition}\n"
             f"Conversation so far:\n{history}\n"
             f"Original Question: {query}\n"
             "Rewrite the original question as a clear, concise, natural-language query suitable for searching a financial report.\n"
@@ -63,14 +64,21 @@ def rewrite_query(query, history):
 def format_history(history):
     if not history:
         return "Beginning of the conversation"
+    output = []
     return "\n".join(
-        f"{'User' if m['role']=='user' else 'Assistant'}: {m['content']}" for m in history
+        f"{m["role"]} : {m['content']}" for m in history
     )
 
 def agentic_rag_pipeline(user_query, file_name, history=None):
     try:
+        if is_definition_query(user_query):
+            logger.info("Search Needed")
+            definition = tavily_lookup(user_query)
+        else:
+            logger.info("Search Not Needed")
+            definition = ''
         formatted_history = format_history(history)
-        retrieval_query = rewrite_query(user_query, formatted_history)
+        retrieval_query = rewrite_query(user_query, formatted_history, definition)
         qa_chain = build_qa_chain(file_name=file_name)
         formatted_query = (
             "### Rewritten query based on history:\n"
@@ -83,16 +91,22 @@ def agentic_rag_pipeline(user_query, file_name, history=None):
         })
         if not response or not isinstance(response, dict):
             logger.error("Invalid response from qa_chain")
-            return {"response": "Sorry, I encountered an error processing your request.", "sources": []}
+            return {"response": "Sorry, I encountered an error processing your request.", 
+            "tool_response": "",
+            "sources": []}
         result = response.get("result", "No response")
         if not isinstance(result, str):
             result = str(result)
             logger.warning(f"Result was not a string, converted to: {result}")
-        return {"response": result, "sources": response.get("source_documents", [])}
+        return {"response": result, 
+        "tool_response": definition,
+        "sources": response.get("source_documents", [])}
         
     except Exception as e:
         logger.error(f"Error in agentic_rag_pipeline: {e}")
-        return {"response": "Sorry, I encountered an error processing your request.", "sources": []}
+        return {"response": "Sorry, I encountered an error processing your request.", 
+        "tool_response": definition,
+        "sources": []}
 
 
 if __name__ == "__main__":
